@@ -2,12 +2,7 @@ from modules.data_fetcher import DataFetcher
 from modules.alert import AlertManager
 from modules.squeeze_detector import SqueezeDetector
 import pandas as pd
-import os
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "..", "data")
-TICKERS = os.path.join(DATA_DIR, "tickers.txt")
-
+from config import TICKERS_FILE as TICKERS
 
 def main():
     fetcher = DataFetcher()

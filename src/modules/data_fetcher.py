@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 import pandas as pd
 import requests
 import sqlite3
-import datetime
 from config import API_KEY, DB_PATH
+import time
 
 load_dotenv()
 
@@ -29,7 +29,7 @@ class DataFetcher:
     def _create_table_if_not_exists(self):
         self.cursor.execute(
             """
-            CREATE TABLE IF NOT EXISTS historical_data (
+            CREATE TABLE IF NOT EXISTS stock_prices (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ticker TEXT NOT NULL,
                 date TEXT NOT NULL,
@@ -42,11 +42,11 @@ class DataFetcher:
         """
         )
         self.conn.commit()
-        print("Table 'historical_data' is ready in stocks.db.")
+        print("Table 'stock_prices' is ready in stocks.db.")
 
     def get_last_stored_date(self, ticker):
         self.cursor.execute(
-            "SELECT MAX(date) FROM historical_data WHERE ticker = ?", (ticker,)
+            "SELECT MAX(timestamp) FROM stock_prices WHERE ticker = ?", (ticker,)
         )
         result = self.cursor.fetchone()[0]
         return result if result else None
@@ -82,33 +82,26 @@ class DataFetcher:
                 print(f"No new data found today for {ticker}")
                 return None
 
-            self._store_data(ticker, data)
+            self._store_data(ticker, data, last_market_date)
         else:
             print(f"Failed to fetch data for {ticker} (HTTP {response.status_code})")
             return None
 
-    def _store_data(self, ticker, data):
+    def _store_data(self, ticker, data, last_market_date):
         for row in data:
             self.cursor.execute(
                 """
-                INSERT INTO historical_data (ticker, date, open, high, low, close)
+                INSERT INTO stock_prices (ticker, timestamp, open, high, low, close)
                 VALUES (?, ?, ?, ?, ?, ?) 
-                ON CONFLICT(ticker, date) 
+                ON CONFLICT(ticker, timestamp) 
                 DO UPDATE SET 
                     open=excluded.open, high=excluded.high, 
                     low=excluded.low, close=excluded.close
                 """,
-                (
-                    ticker,
-                    row["date"],
-                    row["open"],
-                    row["high"],
-                    row["low"],
-                    row["close"],
-                ),
+                (ticker, row["date"], row["open"], row["high"], row["low"], row["close"]),
             )
         self.conn.commit()
-        print(f"Updated {ticker} for {self.last_market_date}")
+        print(f"Updated {ticker} for {last_market_date}")
 
     def close_connection(self):
         self.conn.close()

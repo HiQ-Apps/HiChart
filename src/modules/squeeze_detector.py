@@ -8,14 +8,19 @@ class SqueezeDetector:
         self.cursor = self.conn.cursor()
 
     def get_tickers(self):
-        self.cursor.execute("SELECT DISTINCT ticker FROM historical_data")
+        self.cursor.execute("SELECT DISTINCT ticker FROM stock_prices")
         return [row[0] for row in self.cursor.fetchall()]
+    
+
     def detect_squeeze(self, ticker):
-        df = pd.read_sql(f"SELECT * FROM historical_data WHERE ticker='{ticker}' ORDER BY date", self.conn)
+        df = pd.read_sql(f"SELECT * FROM stock_prices WHERE ticker='{ticker}' ORDER BY timestamp", self.conn)
 
         if df.empty or len(df) < 20:
             print(f"Not enough data for {ticker}, skipping.")
             return None
+
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df.set_index("timestamp", inplace=True)
 
         df["SMA20"] = df["close"].rolling(20).mean()
         df["StdDev"] = df["close"].rolling(20).std()
@@ -30,7 +35,7 @@ class SqueezeDetector:
         df["squeeze_fired"] = df["squeeze_on"].shift(1) & ~df["squeeze_on"]
         df["bullish_squeeze"] = df["squeeze_fired"] & (df["close"] > df["EMA20"])
 
-        squeeze_df = df[df["bullish_squeeze"]][["ticker", "date", "bullish_squeeze"]]
+        squeeze_df = df[df["bullish_squeeze"]].reset_index()[["ticker", "timestamp", "bullish_squeeze"]]
 
         if not squeeze_df.empty:
             squeeze_df.to_sql("squeeze_signals", self.conn, if_exists="append", index=False)
