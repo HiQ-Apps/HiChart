@@ -23,14 +23,14 @@ class AlertManager:
             print("No bullish squeezes found.")
             return
         
-        squeeze_df["date"] = pd.to_datetime(squeeze_df["date"])
+        squeeze_df["timestamp"] = pd.to_datetime(squeeze_df["timestamp"])
         today = datetime.today()
         two_days_ago = today - timedelta(days=5)
 
-        recent_signals = squeeze_df[squeeze_df["date"] >= two_days_ago]
+        recent_signals = squeeze_df[squeeze_df["timestamp"] >= two_days_ago]
         # recent_signals = squeeze_df[squeeze_df["date"] >= "2024-10-01"]
         if not recent_signals.empty:
             for _, row in recent_signals.iterrows():
-                ticker, date = row["ticker"], row["date"].strftime("%Y-%m-%d")
+                ticker, date = row["ticker"], row["timestamp"].strftime("%Y-%m-%d")
                 message = f"**BUY**: {ticker} fired a TTM Squeeze on {date}"
                 self.send_discord_alert(message)
