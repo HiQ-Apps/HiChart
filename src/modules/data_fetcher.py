@@ -4,13 +4,12 @@ import os
 import requests
 import sqlite3
 import datetime
-
+from config import API_KEY
 load_dotenv()
 
 class DataFetcher:
-
     BASE_URL = "https://api.tradier.com/v1/markets/history"
-    HEADERS = {"Authorization": f"Bearer {os.getenv("KEY")}", "Accept": "application/json"}
+    HEADERS = {"Authorization": f"Bearer {API_KEY}", "Accept": "application/json"}
 
     def __init__(self, db_path="stocks.db"):
         self.conn = sqlite3.connect(db_path)

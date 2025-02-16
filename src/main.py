@@ -1,14 +1,20 @@
-from data_fetcher import DataFetcher
-from alert import AlertManager
-from squeeze_detector import SqueezeDetector
+from modules.data_fetcher import DataFetcher
+from modules.alert import AlertManager
+from modules.squeeze_detector import SqueezeDetector
 import pandas as pd
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+TICKERS = os.path.join(DATA_DIR, "tickers.txt")
+
 
 def main():
     fetcher = DataFetcher()
     detector = SqueezeDetector()
     alerts = AlertManager()
 
-    with open("tickers.txt", "r") as f:
+    with open(TICKERS, "r") as f:
         tickers = [line.strip() for line in f.readlines()]
     
     for ticker in tickers:

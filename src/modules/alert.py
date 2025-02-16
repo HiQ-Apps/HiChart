@@ -3,12 +3,12 @@ import requests
 import pandas as pd
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-
+from config import DISCORD_WEBHOOK_URL
 load_dotenv()
 
 class AlertManager:
     def __init__(self):
-        self.DISCORD_WEBHOOK_URL = os.getenv("WEBHOOK")
+        self.DISCORD_WEBHOOK_URL = DISCORD_WEBHOOK_URL
 
     def send_discord_alert(self, message):
         payload = {"content": message}

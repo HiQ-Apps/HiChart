@@ -1,8 +1,9 @@
 import sqlite3
 import pandas as pd
+from config import DB_PATH
 
 class SqueezeDetector:
-    def __init__(self, db_path="stocks.db"):
+    def __init__(self, db_path=DB_PATH):
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
 
