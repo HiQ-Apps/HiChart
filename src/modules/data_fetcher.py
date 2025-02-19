@@ -68,7 +68,6 @@ class DataFetcher:
             )
             return None
 
-        print(f"Fetching new data for {ticker} since last date: {last_stored_date}")
         params = {
             "symbol": ticker,
             "interval": "daily",

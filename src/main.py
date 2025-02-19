@@ -28,11 +28,10 @@ def main():
         try:
             with open(TICKERS, "r") as f:
                 tickers = [line.strip() for line in f.readlines()]
-
             total_tickers = len(tickers)
             for i, ticker in enumerate(tickers, start=1):
                 fetcher.fetch_data(ticker)
-                print_progress_bar(i, total_tickers) 
+                print_progress_bar(i, total_tickers, ticker) 
         except FileNotFoundError:
             print(f"{TICKERS} file not found. ")
 
