@@ -15,21 +15,19 @@ class AlertManager:
         payload = {"content": message}
         response = requests.post(self.DISCORD_WEBHOOK_URL, json=payload)
         if response.status_code == 204:
-            print("✅ Alert sent for:", message.split("\n")[2])  # Print ticker
+            print("✅Alert sent for:", message.split("\n")[2]) 
         else:
-            print(f"❌ Failed to send alert. Status Code: {response.status_code}")
+            print(f"Failed to send alert. Status Code: {response.status_code}")
 
     def send_squeeze_alerts(self, squeeze_df, days):
         if squeeze_df is None or squeeze_df.empty:
             print(f"⚠️ No squeeze signals found in the last {days} days.")
             return
         
-        # Convert timestamp to datetime and filter for last `days` days
         squeeze_df["timestamp"] = pd.to_datetime(squeeze_df["timestamp"])
         start_date = datetime.today() - timedelta(days=days)
         recent_signals = squeeze_df[squeeze_df["timestamp"] >= start_date]
 
-        # 🛑 Prevent duplicate alerts by keeping only the first occurrence of each ticker
         recent_signals = recent_signals.drop_duplicates(subset=["ticker"], keep="first")
 
         if not recent_signals.empty:

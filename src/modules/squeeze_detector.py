@@ -44,11 +44,9 @@ class SqueezeDetector:
         df["EMA20"] = df["close"].ewm(span=20, adjust=False).mean()
         df["UpperKC"], df["LowerKC"] = self._calculate_keltner_channels(df["high"], df["low"], df["close"], df["ATR"])
 
-        # Volume-Based High Relative Volume Detection
         df["vol_SMA"] = df["volume"].rolling(20).mean()
         df["high_RVol"] = df["volume"] > (df["vol_SMA"] * 1.5)
 
-        # Squeeze Conditions
         df["squeeze_on"] = (df["LowerBB"] > df["LowerKC"]) & (df["UpperBB"] < df["UpperKC"])
         df["squeeze_fired"] = df["squeeze_on"].shift(1) & ~df["squeeze_on"]
         df["bullish_squeeze"] = df["squeeze_fired"] & (df["close"] > df["EMA20"]) & df["high_RVol"]

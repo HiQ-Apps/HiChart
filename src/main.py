@@ -2,18 +2,13 @@ from modules.data_fetcher import DataFetcher
 from modules.alert import AlertManager
 from modules.squeeze_detector import SqueezeDetector
 import pandas as pd
-from config import TICKERS_FILE as TICKERS, DB_PATH
+from config import TICKERS_FILE as TICKERS
 import argparse
-import sqlite3
+from utils import load_squeeze_signals, print_progress_bar
 
 
-def load_squeeze_signals(days):
-    """Load squeeze signals from SQLite based on a given number of days."""
-    conn = sqlite3.connect(DB_PATH)
-    query = f"SELECT * FROM squeeze_signals WHERE timestamp >= date('now', '-{days} days') ORDER BY timestamp DESC"
-    squeeze_df = pd.read_sql(query, conn)
-    conn.close()
-    return squeeze_df
+
+
 
 def main():
     fetcher = DataFetcher()
@@ -33,8 +28,11 @@ def main():
         try:
             with open(TICKERS, "r") as f:
                 tickers = [line.strip() for line in f.readlines()]
-            for ticker in tickers:
+
+            total_tickers = len(tickers)
+            for i, ticker in enumerate(tickers, start=1):
                 fetcher.fetch_data(ticker)
+                print_progress_bar(i, total_tickers) 
         except FileNotFoundError:
             print(f"{TICKERS} file not found. ")
 
