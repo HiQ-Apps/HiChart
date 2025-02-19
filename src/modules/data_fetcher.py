@@ -32,12 +32,13 @@ class DataFetcher:
             CREATE TABLE IF NOT EXISTS stock_prices (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ticker TEXT NOT NULL,
-                date TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
                 open REAL,
                 high REAL,
                 low REAL,
                 close REAL,
-                UNIQUE(ticker, date)
+                volume INT,
+                UNIQUE(ticker, timestamp)
             );
         """
         )
@@ -88,17 +89,19 @@ class DataFetcher:
             return None
 
     def _store_data(self, ticker, data, last_market_date):
+        if isinstance(data,dict):
+            data = [data]
         for row in data:
             self.cursor.execute(
                 """
-                INSERT INTO stock_prices (ticker, timestamp, open, high, low, close)
-                VALUES (?, ?, ?, ?, ?, ?) 
+                INSERT INTO stock_prices (ticker, timestamp, open, high, low, close, volume)
+                VALUES (?, ?, ?, ?, ?, ?, ?) 
                 ON CONFLICT(ticker, timestamp) 
                 DO UPDATE SET 
                     open=excluded.open, high=excluded.high, 
                     low=excluded.low, close=excluded.close
                 """,
-                (ticker, row["date"], row["open"], row["high"], row["low"], row["close"]),
+                (ticker, row["date"], row["open"], row["high"], row["low"], row["close"], row["volume"]),
             )
         self.conn.commit()
         print(f"Updated {ticker} for {last_market_date}")

@@ -13,3 +13,5 @@ if not os.path.exists(DATA_DIR):
 
 API_KEY = os.getenv("KEY")
 DISCORD_WEBHOOK_URL = os.getenv("WEBHOOK")
+USER1 = os.getenv("USER1")
+USER2 = os.getenv("USER2")

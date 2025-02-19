@@ -36,6 +36,7 @@ def create_db(db_name=DB_PATH):
             high REAL,
             low REAL,
             close REAL,
+            volume INT,
             PRIMARY KEY (ticker, timestamp)
         );
     """)
@@ -67,8 +68,8 @@ def insert_data(db_name, ticker, df):
 
         for index, row in df.iterrows():
             cursor.execute("""
-            INSERT INTO stock_prices (ticker, timestamp, open, high, low, close)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO stock_prices (ticker, timestamp, open, high, low, close, volume)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(ticker, timestamp) 
             DO UPDATE SET 
                 open=excluded.open, high=excluded.high, 
@@ -79,7 +80,8 @@ def insert_data(db_name, ticker, df):
                 float(row["Open"]), 
                 float(row["High"]), 
                 float(row["Low"]), 
-                float(row["Close"])
+                float(row["Close"]),
+                int(row['Volume'])
             ))
 
         conn.commit()
